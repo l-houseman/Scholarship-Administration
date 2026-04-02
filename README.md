@@ -1,4 +1,5 @@
 # USRA Application and Transcript Protocol 2026
+These scripts are used to automate a manual process of naming and sorting large-volume files. This saved ~24 hours of work time in 2026
 
 ## Stage 1: Application Sorting and File Naming Protocol
 ### How to run this protocol (Application Naming and Sorting Script) - Powershell7
