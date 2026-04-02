@@ -227,3 +227,101 @@ Each row captures:
 - destination folder + output filename
 - action: planned / written / fallback / skipped / error
 - notes (including “legend appended”)
+
+## Stage 3: Validating that each student folder exists, and has all  required documents
+This script verifies that all USRA applicants have a folder and that each folder contains the required application and transcript documents for adjudication.
+
+**It cross checks:**
+- An official Excel roster of student names
+- Against the organized USRA application folder structure
+- And produces a single CSV audit report identifying:
+  - missing folders
+  - missing documents
+  - extra folders not tied to a student in the roster
+This script is designed to be repeatable year to year with minimal changes.
+
+**What the script checks:**
+For each student listed in the Excel roster, the script verifies:
+Required documents (must exist)
+- Faculty Application Form
+  2026 USRA Faculty Application Form_Firstname Lastname.pdf
+- Student Application Form
+  2026 USRA Student Application Form_Firstname Lastname.pdf
+Transcript rules
+- At least one of the following must exist:
+  - USask Transcript
+    2026 USRA USask Transcript_Firstname Lastname.pdf
+  - Non USask Transcript
+    2026 USRA Non-USask Transcript_Firstname Lastname.pdf
+- Some students may have both transcripts; this is valid.
+  
+**Folder level checks**
+- Every student in the Excel roster should have exactly one folder
+- Folders present on disk but not in the roster are flagged
+- The fallback folder
+_NO_STUDENT_FOLDER_FOUND
+is recorded but not validated, since it is an intentional holding location
+
+**Folder structure assumed**
+USRA 2026_Organized\
+- ├─ Firstname Lastname\
+  - │  ├─ 2026 USRA Faculty Application Form_Firstname Lastname.pdf
+  - │  ├─ 2026 USRA Student Application Form_Firstname Lastname.pdf
+  - │  ├─ 2026 USRA USask Transcript_Firstname Lastname.pdf
+  - │  └─ 2026 USRA Non-USask Transcript_Firstname Lastname.pdf   (optional)
+  - │
+- ├─ _NO_STUDENT_FOLDER_FOUND\
+- │  └─ ...
+
+Document matching is done by filename prefix, not full filename, so minor differences after the student name will not break the script.
+
+**Inputs**
+1. Excel roster
+An .xlsx file containing at least:
+- Student first name
+- Student last name
+The script is flexible about column headers (e.g., “First Name”, “Student First Name”, etc.).
+2. Organized root folder
+The directory containing one folder per student.
+
+**Outputs**
+The script generates one CSV file in the organized root, named:
+USRA_2026_folder_and_file_audit_YYYYMMDD_HHMMSS.csv
+
+**Output columns**
+| Column | Meaning |
+| ------ | ------- |
+| NameOrFolder |	Student name (from Excel) or folder name |
+| FolderExists |	YES / NO |
+| FacultyApplicationForm |	YES / NO |
+| StudentApplicationForm |	YES / NO |
+| USaskTranscript |	YES / NO |
+| NonUSaskTranscript |	YES / NO |
+| Status |	Complete or specific issue(s) |
+
+**Status values you may see**
+- Complete
+- MissingFolder
+- MissingFacultyApplication
+- MissingStudentApplication
+- MissingTranscript
+- ExtraFolder_NotInRoster
+- FallbackFolder
+Multiple issues are listed as semicolon separated values.
+
+#### How to run the script
+1.	Open Command Prompt (or PowerShell).
+2.	Navigate to the project directory
+3.	Run python Scripts\audit_usra_2026_folders_against_roster.py
+4.	Open the generated CSV in Excel and filter by the status column
+
+**Recommended workflow**
+1.	Run the transcript splitting script first
+2.	Manually resolve items in _NO_STUDENT_FOLDER_FOUND
+3.	Run this audit script
+4.	Filter the CSV to:
+    - Status ≠ Complete
+    - Status = MissingFolder
+    - Status = ExtraFolder_NotInRoster
+5.	Resolve issues and re run until clean
+
