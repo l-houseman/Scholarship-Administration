@@ -1,6 +1,15 @@
 # USRA Application and Transcript Protocol 2026
-These scripts are used to automate a manual process of naming and sorting large-volume files. This saved ~24 hours of work time in 2026
+These scripts are used to automate a manual research administration process of naming and sorting large-volume files; creating reviewer assignments; consolidating hiring information; creating award letters and result notifications. This saved ~40 hours of work time in 2026
 
+## Table of Contents
+*[Application Sorting, File Naming, and Validation](#application-sorting-file-naming-and-validation)
+*[Reviewer Assignment Creation](#reviewer-assignment-creation)
+*[Hiring Information Document Naming and Consolidation](hiring-information-document-naming-and-consolidation)
+*[Award Document Creation](#award-document-creation)
+*[Award Notification Creation](#award-notification-creation)
+
+
+## Application Sorting, File Naming, and Validation
 ## Stage 1: Application Sorting and File Naming Protocol
 ### How to run this protocol (Application Naming and Sorting Script) - Powershell7
 **1.	Confirm the three input folders exist and are populated. This step takes three sets of incoming files:**
@@ -326,3 +335,10 @@ Multiple issues are listed as semicolon separated values.
     - Status = ExtraFolder_NotInRoster
 5.	Resolve issues and re run until clean
 
+## Reviewer Assignment Creation
+
+## Hiring Information Document Naming and Consolidation 
+
+## Award Document Creation
+
+## Award Notification Creation
