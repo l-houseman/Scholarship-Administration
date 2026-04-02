@@ -2,11 +2,11 @@
 These scripts are used to automate a manual research administration process of naming and sorting large-volume files; creating reviewer assignments; consolidating hiring information; creating award letters and result notifications. This saved ~40 hours of work time in 2026
 
 ## Table of Contents
-*[Application Sorting, File Naming, and Validation](#application-sorting-file-naming-and-validation)
-*[Reviewer Assignment Creation](#reviewer-assignment-creation)
-*[Hiring Information Document Naming and Consolidation](hiring-information-document-naming-and-consolidation)
-*[Award Document Creation](#award-document-creation)
-*[Award Notification Creation](#award-notification-creation)
+- [Application Sorting, File Naming, and Validation](#application-sorting-file-naming-and-validation)
+- [Reviewer Assignment Creation](#reviewer-assignment-creation)
+- [Hiring Information Document Naming and Consolidation](hiring-information-document-naming-and-consolidation)
+- [Award Document Creation](#award-document-creation)
+- [Award Notification Creation](#award-notification-creation)
 
 
 ## Application Sorting, File Naming, and Validation
