@@ -336,9 +336,13 @@ Multiple issues are listed as semicolon separated values.
 5.	Resolve issues and re run until clean
 
 ## Reviewer Assignment Creation
+Python code based on strict reviewer recusal rules
 
 ## Hiring Information Document Naming and Consolidation 
+Auto name files with python, consolidate with powerquery, excel formula to sort awarded, alternate list, and unawarded
 
 ## Award Document Creation
+VBA code to amplify Word MailMerge to create, save as PDF, and name award documents
 
 ## Award Notification Creation
+VBA code to automate creation of personalized email notifications with unique attachments
