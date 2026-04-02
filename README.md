@@ -1,7 +1,7 @@
 # USRA Application and Transcript Protocol 2026
 
 ## Stage 1: Application Sorting and File Naming Protocol
-### How to run this protocol (Naming and Sorting Automation Script)
+### How to run this protocol (Application Naming and Sorting Script) - Powershell7
 **1.	Confirm the three input folders exist and are populated. This step takes three sets of incoming files:**
 - USRA 2026 Applications/
   - Student Application Forms
@@ -91,7 +91,7 @@ Contains, per student folder detected:
 - the expected folder path
 This report is built from a hashtable ($StudentDocs) that tracks which doc categories were successfully processed for each student.
 
-## Stage 2: Splitting, naming, and sorting USask transcript files (Python transcript splitter) 
+## Stage 2: Splitting, naming, and sorting USask transcript files (Transcript Splitter) - Python
 *Note: Because USask transcript files may contain full legal names that many students do not use, this still requires some manual consolidation (e.g., legal name on transcript is Susan Anna Joyce Double Lastname but student actually uses Susan Lastname in practice; you will need to consolidate “Susan Anna Joyce Double Lastname” file with “Susan Lastname” file). 
 
 **This step takes one consolidated PDF containing many USask transcripts and produces:**
