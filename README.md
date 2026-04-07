@@ -1,5 +1,5 @@
-# USRA Application and Transcript Protocol 2026
-These scripts are used to automate a manual research administration process of naming and sorting large-volume files; creating reviewer assignments; consolidating hiring information; creating award letters and result notifications. This saved ~40 hours of work time in 2026
+# USRA Administration Protocol 2026
+These scripts are used to automate a manual scholarship research administration process of naming and sorting large-volume files; creating reviewer assignments; consolidating hiring information; creating award letters and result notifications. This saved ~40 hours of work time in 2026
 
 ## Table of Contents
 - [Application Sorting, File Naming, and Validation](#application-sorting-file-naming-and-validation)
