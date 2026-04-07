@@ -10,8 +10,8 @@ These scripts are used to automate a manual scholarship research administration 
 
 
 ## Application Sorting, File Naming, and Validation
-## Stage 1: Application Sorting and File Naming Protocol
-### How to run this protocol (Application Naming and Sorting Script) - Powershell7
+### Stage 1: Application Sorting and File Naming Protocol
+#### How to run this protocol (Application Naming and Sorting Script) - Powershell7
 **1.	Confirm the three input folders exist and are populated. This step takes three sets of incoming files:**
 - USRA 2026 Applications/
   - Student Application Forms
@@ -101,7 +101,7 @@ Contains, per student folder detected:
 - the expected folder path
 This report is built from a hashtable ($StudentDocs) that tracks which doc categories were successfully processed for each student.
 
-## Stage 2: Splitting, naming, and sorting USask transcript files (Transcript Splitter) - Python
+### Stage 2: Splitting, naming, and sorting USask transcript files (Transcript Splitter) - Python
 *Note: Because USask transcript files may contain full legal names that many students do not use, this still requires some manual consolidation (e.g., legal name on transcript is Susan Anna Joyce Double Lastname but student actually uses Susan Lastname in practice; you will need to consolidate “Susan Anna Joyce Double Lastname” file with “Susan Lastname” file). 
 
 **This step takes one consolidated PDF containing many USask transcripts and produces:**
@@ -238,7 +238,7 @@ Each row captures:
 - action: planned / written / fallback / skipped / error
 - notes (including “legend appended”)
 
-## Stage 3: Validating that each student folder exists, and has all  required documents
+### Stage 3: Validating that each student folder exists, and has all  required documents
 This script verifies that all USRA applicants have a folder and that each folder contains the required application and transcript documents for adjudication.
 
 **It cross checks:**
@@ -250,7 +250,7 @@ This script verifies that all USRA applicants have a folder and that each folder
   - extra folders not tied to a student in the roster
 This script is designed to be repeatable year to year with minimal changes.
 
-**What the script checks:**
+#### **What the script checks:**
 For each student listed in the Excel roster, the script verifies:
 Required documents (must exist)
 - Faculty Application Form
@@ -336,7 +336,73 @@ Multiple issues are listed as semicolon separated values.
 5.	Resolve issues and re run until clean
 
 ## Reviewer Assignment Creation
-Python code based on strict reviewer recusal rules
+This protocol creates a list of which applications a reviewer can be assigned to, and creates a first take at creating assignments. Human audit is necessary, given that there are year-to-year intricacies that are not accounted for in the script. Python.
+
+### Stage 1: Build eligibility possibilities (who can review what) 
+Stage 1 creates a conflict‑free eligibility universe by excluding own‑department, own‑student, student‑department, and declared department conflicts, fully supporting cross‑listed departments and co‑supervision; it produces USRA_eligibility_pairs.xlsx for transparent auditing. 
+
+**Purpose:** Construct a conflict‑free set of all allowed (application, reviewer) pairs before any assignment. This ensures the adjudicators are assigned eligible application packages. 
+**Script name:** stage1_build_eligibility.py 
+**Requirements:**
+- All input spreadsheets, cleaned, ensuring that all departments/names are uniform
+- Info about stream review eligibility 
+
+**Inputs:** 
+- Applicants workbook with one row per application, including columns:
+  - AppID, StudentDepartment, SupervisorNSID, and the award stream in Which award are you applying for?
+- Reviewers workbook with one row per reviewer, including columns:
+  - ReviewerNSID, ReviewerDept, HasStudentInCompetition, StudentDepartmentList, ConflictDepartmentList, and StreamReview Eligibility  
+
+**Normalization:**
+- Convert NSIDs to lowercase for exact matching (avoids case‑related misses).
+- Split any semicolon‑separated fields into arrays (e.g., multi‑department values, multi‑supervisor NSIDs).
+- Treat department fields as lists and check for any overlap (supports cross‑listed student departments and multi‑appointment reviewers).  
+
+**Hard exclusion rules (all must be satisfied to be eligible):** 
+- Own department rule: Reject if the reviewer’s department list intersects the application’s student department list.
+- Own student rule: Reject if the reviewer’s NSID appears in the application’s SupervisorNSID list (handles co‑supervisors).
+- Student‑department rule: If the reviewer has a student in the competition, reject if the application’s student department appears in the reviewer’s StudentDepartmentList.
+- Declared conflicts rule: Reject if the application’s student department appears in the reviewer’s ConflictDepartmentList.  
+
+**Outputs:**
+- USRA_eligibility_pairs.xlsx with:
+  - EligibilityPairs: one row per permissible (AppID, ReviewerNSID) («Eligible = Yes»)
+  - AppDiagnostics: count of eligible reviewers per AppID
+  - ReviewerDiagnostics: count of eligible applications per ReviewerNSID
+  - Apps_LT2_Eligible: applications with fewer than two eligible reviewers (should be empty before proceeding to ensure there are enough reviewers with the conflict rules applied) 
+
+### Stage 2: Create assignments (who will review what) 
+Stage 2 assigns two reviewers to each application, held reviewer loads to 10–12, preferred CIHR/SSHRC‑eligible reviewers for those streams (flagging any necessary fallbacks), and exported a ready‑to‑use workbook. 
+
+**Purpose:** Assign two reviewers to each application, while holding reviewer workloads to 10–12 applications and respecting stream preferences for CIHR/SSHRC. 
+**Script name:** stage2_make_assignments.py 
+
+**Inputs:**
+- Stage 1 output: USRA_eligibility_pairs.xlsx → EligibilityPairs (the allowed pair universe).
+- Applicants workbook: used for each app’s award stream and to add the StudentName to outputs.
+- Reviewers workbook: used for stream eligibility (StreamReview Eligibility) and to add ReviewerName to outputs.  
+
+**Stream rule:**
+- CIHR and SSHRC apps: the script first tries to assign both reviewers who list the relevant stream in StreamReview Eligibility.
+  - If the eligible pool is too thin to fill both slots under the load caps, the script fills the remaining slot(s) from the general COI‑eligible pool, and logs the case in Exceptions as a “fallback used” for that CIHR/SSHRC app.
+- NSERC apps: any eligible reviewer is acceptable (this may change year to year); there is no stream filtering here  
+
+**Assignment process:** 
+1. Order applications hardest‑first. CIHR/SSHRC apps are ordered by (a) count of stream‑eligible reviewers available, then (b) total COI‑eligible reviewers; NSERC apps are assigned later. This protects scarce expertise.
+2. Pick two reviewers per app from the allowed pool under MAX_LOAD = 12, prioritizing the lowest current load and the stream‑eligible subset where required. The selection is deterministic with a fixed random seed to break ties.
+3. Repair to minimum load. After the first pass, a swap routine uses only eligible alternatives to raise any reviewer below MIN_LOAD = 10 into range, while avoiding breaking a perfect CIHR/SSHRC stream match when possible. (If an app already needed a stream fallback, the script is more flexible.)
+4. Validate.
+   - Confirm total assignments = 195 apps × 2 = 390
+   - Flag any reviewer outside the 10–12 range
+   - Flag any CIHR/SSHRC app that required a stream fallback
+   - All flags go to an Exceptions sheet for co-chair review.  
+
+**Outputs:** 
+- USRA_assignments.xlsx with four tabs:
+  - Assignments_ByApp — AppID, StudentName, AwardStream, Reviewer1NSID, Reviewer1Name, Reviewer2NSID, Reviewer2Name (names are now merged automatically from your source files).
+  - Assignments_ByReviewer — ReviewerNSID, ReviewerName, AssignedAppCount, list of AppIDs.
+  - LoadSummary — one line per reviewer with assigned count and a boolean Within10to12 check.
+  - Exceptions — any CIHR/SSHRC fallbacks (i.e., when the pool didn’t allow both reviewers to be stream‑eligible) and any load out‑of‑range or feasibility anomalies. 
 
 ## Hiring Information Document Naming and Consolidation 
 Auto name files with python, consolidate with powerquery, excel formula to sort awarded, alternate list, and unawarded
