@@ -5,6 +5,7 @@ These scripts are used to automate a manual scholarship research administration 
 - [Application Sorting, File Naming, and Validation](#application-sorting-file-naming-and-validation)
 - [Reviewer Assignment Creation](#reviewer-assignment-creation)
 - [Hiring Information Document Naming and Consolidation](#hiring-information-document-naming-and-consolidation)
+- [Award Document Creation](#award-documentation-creation)
 - [Award Notification Creation](#award-notification-creation)
 
 
@@ -462,8 +463,116 @@ At the top of the script:
 6. Set $DryRun = $false
 7. Run again to apply changes
 
-## Award Document Creation
-VBA code to amplify Word MailMerge to create, save as PDF, and name award documents
+### Stage 2 - Consolidate Individual Files with Powery Query
+Power Query: One-Time Extraction of 1 row of hiring data per student
 
+**Step-by-Step:**
+1. Put all the individual forms in one folder
+Make sure they are the only Excel files in that folder.
+2. In your master workbook
+Go to:
+Data → Get Data → From File → From Folder
+Select the folder.
+Power Query will show you the file list.
+Click Combine & Transform Data. 
+3. In the preview window
+Power Query shows a sample file.
+Important:
+On the left, choose the sheet named Info for Student Hiring (this matches your file).
+Click OK.
+This loads the entire sheet, but we will trim it.
+4. Transform the sheet in Power Query
+Once you're inside Power Query:
+Step A — Remove the first row
+This gets rid of the block of instructions/header text.
+Home → Remove Rows → Remove Top Rows → enter 1.
+
+Step B — Promote the new first row to headers
+Home → Use First Row as Headers
+This makes Row 2 (your labels) the official headers.
+
+Step C — Filter to keep only Row 1 (the data row)
+Your remaining table now has:
+
+Row 1 → student’s actual values
+Row 2+ → blank rows or unused fields
+
+Apply a filter on any column to remove blank rows.
+Example (choose a column with full data, like “Student Full Name”):
+Filter → Remove null / blanks
+
+Step D — Keep only Columns B–L
+Select the columns you want to keep:
+
+Student Full Name
+Student NSID
+Faculty Supervisor Name
+Faculty NSID
+Faculty Email
+Length of Project
+Proposed Start Date
+Student Hourly Wage
+CFOAPAL 1
+CFOAPAL 2
+Onboarding Contact NSID
+
+Right‑click → Remove Other Columns
+Now you have exactly your desired row.
+
+Step E — Close & Load
+Home → Close & Load
+Power Query combines all the files using the same steps and appends the rows.
+
+### Stage 3 - Sort into Awarded, Alternate List, and Unawarded Tabs
+1. Sort hiring and result spreadsheets the same way (by NSID is usually best)
+2. Insert that data beside the NSID column in the hiring spreadsheet. 
+3. If everything is sorted and named correctly, the rows should match up. To check, run a quick IF statement in Excel to see if they actually match:
+Allow for leading/trailing spaces | =IF(TRIM(A1)=TRIM(B1),"Match","No match")
+4. Solve any problems, and copy awarded, alternate list, and unawarded info to individual tabs
+
+
+## Award Document Creation
+This step uses VBA code created by Imnoss Ltd to amplify Word MailMerge to create, save as PDF, and name individual award documents. 
+1. Prepare spreadsheet of info and template letter as you usually do for a Word MailMerge
+   - Spreadsheet must contain **EXACT** columns DocFolderPath and DocFileName (for Word copies_ and PdfFolderPath and PdfFileName (for the PDF copies)
+3. Go through usual MailMerge steps to create individual letters, but stop before "save letters" step.
+4a. Save the Macro for one time use (save for future use with 4b) 
+- Open the VBA Editor
+  - Press Alt + F11
+  - The Visual Basic for Applications editor opens
+- Insert a new module
+  - In the left pane, find:
+    - VBAProject (YourDocumentName)
+  - Right‑click on it
+  - Choose Insert → Module
+- Paste the macro
+  - Paste the entire macro exactly as‑is into the code window. Script Name: Imnross Ltd MailMerge to PDF
+- Save Word doc as a macro-enabled file
+4b. Save the Macro for all Word documents (recommended)
+- Open Microsoft Word
+  - Open Word normally (no document is required).
+- Open the VBA Editor
+  - Press: Alt + F11
+  - This opens the Visual Basic for Applications editor.
+- Locate the global template
+  - In the left pane (Project Explorer), find: VBAProject (Normal)
+  - If the pane isn’t visible: Click View → Project Explorer
+- Insert a new module
+  - Right‑click VBAProject (Normal)
+  - Select Insert → Module
+    - A blank code window opens.
+- Paste the macro code
+  - Paste the full macro exactly as provided (see 4a for script location)
+- Save the macro
+  - Close the VBA editor (Alt + Q), or close Word
+    - When prompted "Save changes to Normal.dotm?", Click Yes
+- The macro is now permanently stored on that machine.
+5. Run the MailMergeToPdfBasic Macro, and let it run to create your individual award letters 
+
+**To Use the Macro Later**
+- Once saved to Normal.dotm: Open any Word mail‑merge document, select Macros and choose MailMergToPdfBasic, click Run
+- The macro will execute using the currently open document.
+  
 ## Award Notification Creation
-VBA code to automate creation of personalized email notifications with unique attachments
+This step uses VBA code to automate the creation of personalized email notifications with unique attachments from an Excel spreadsheet
+- Process documentation to be provided
