@@ -4,8 +4,7 @@ These scripts are used to automate a manual scholarship research administration 
 ## Table of Contents
 - [Application Sorting, File Naming, and Validation](#application-sorting-file-naming-and-validation)
 - [Reviewer Assignment Creation](#reviewer-assignment-creation)
-- [Hiring Information Document Naming and Consolidation](hiring-information-document-naming-and-consolidation)
-- [Award Document Creation](#award-document-creation)
+- [Hiring Information Document Naming and Consolidation](#hiring-information-document-naming-and-consolidation)
 - [Award Notification Creation](#award-notification-creation)
 
 
