@@ -11,7 +11,7 @@ These scripts are used to automate a manual scholarship research administration 
 
 ## Application Sorting, File Naming, and Validation
 ### Stage 1: Application Sorting and File Naming Protocol
-#### How to run this protocol (Application Naming and Sorting Script) - Powershell7
+#### How to run this protocol (Application Naming and Sorting Script) - PowerShell 7
 **1.	Confirm the three input folders exist and are populated. This step takes three sets of incoming files:**
 - USRA 2026 Applications/
   - Student Application Forms
@@ -405,7 +405,63 @@ Stage 2 assigns two reviewers to each application, held reviewer loads to 10–1
   - Exceptions — any CIHR/SSHRC fallbacks (i.e., when the pool didn’t allow both reviewers to be stream‑eligible) and any load out‑of‑range or feasibility anomalies. 
 
 ## Hiring Information Document Naming and Consolidation 
-Auto name files with python, consolidate with powerquery, excel formula to sort awarded, alternate list, and unawarded
+This step uses 1) a PowerShell script to rename and file student hiring forms, 2) PowerQuery to consolidate ~200 individual Excel forms into one spreadsheet, then 3) Excel formulas + award result data from another spreadsheet to verify which to copy to the awarded, alternate list, and unawarded list tabs. 
+
+### Stage 1 - Rename Individual Excel Sheets for Easy Reference Later
+Script file: rename_move student hiring forms.ps1
+This stage replicates the naming process. [Application Sorting, File Naming, and Validation](#application-sorting-file-naming-and-validation) to standardize file names and append the student's name so the individual file can be easily found later if necessary. 
+**Purpose:** This PowerShell 7 script renames and moves completed “Information for Student Hiring” Excel forms into a single destination folder using a standardized filename format. It is intended for one‑time batch processing of hiring forms after submission.
+The script does not modify file contents. It only renames and moves files.
+**Maintenance Notes:**
+This script is designed for:
+- One‑time annual use
+- Predictable file naming
+- Small‑to‑moderate batch sizes
+ 
+**What This Script Does:** For each file in the source folder:
+- Extracts the student name from the filename after the final underscore (_)
+- Renames the file to a standardized format:
+- 2026 USRA Hiring Form_<Student Name>.xlsx
+- Moves the renamed file into a single destination folder
+- Prevents overwriting by appending (1), (2), etc. if a filename already exists
+- Optionally runs in DryRun mode to preview changes without making them
+
+**Required Folder Structure:**
+Input (source)
+All hiring forms must already exist in one folder:
+- C:\Users\ljh440\USRA 2026 Applications\Inputs\Information for Student Hiring Forms\
+
+Output (destination)
+The script moves files into:
+- C:\Users\ljh440\USRA 2026 Applications\USRA 2026_Hiring Forms\
+- The destination folder will be created automatically if it does not exist.
+
+**Filename Requirements:**
+Each file must end with the student’s name after a final underscore. This structure is automatically created from our application portal. If the default structure differs year-to-year, the code would need to be updated. If no final underscore‑suffix name is found, the file is skipped with a warning.
+
+Valid examples:
+- faculty-information-for-student-hirin_Mary Cherneske.xlsx
+- FacultyHiringForm_Jordan Lee.xlsx
+- HiringForm_Final_Emily Zhao.xlsx
+Invalid examples:
+- HiringForm.xlsx
+- HiringForm_Mary_Cherneske.xlsx   ← ambiguous underscore usage
+
+**Configuration SettingsL**
+At the top of the script:
+- $SourceDir = '...Inputs\Information for Student Hiring Forms'
+- $DestDir   = '...USRA 2026_Hiring Forms'
+- $YearLabel = '2026' (controls the year shown in the renamed file)
+- $DryRun    = $false ($true = preview only, $false = execute changes | always run once with $true to make sure it will work at intended)
+
+**How to Run:**
+1. Save the script as a .ps1 file (e.g., Rename-Hiring-Forms.ps1)
+2. Open PowerShell 7
+3. Run: PowerShellSet-ExecutionPolicy -Scope Process -ExecutionPolicy BypassShow more lines
+4. Run the script
+5. Review output in DryRun
+6. Set $DryRun = $false
+7. Run again to apply changes
 
 ## Award Document Creation
 VBA code to amplify Word MailMerge to create, save as PDF, and name award documents
